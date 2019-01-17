@@ -1,5 +1,5 @@
 NMF with anchor word recovery:
-anchor-word-recovery
+anchor-word-recovery. Code from: https://cs.nyu.edu/~halpern/code.html
 
 LDA with VI:
 https://towardsdatascience.com/topic-modeling-and-latent-dirichlet-allocation-in-python-9bf156893c24 
