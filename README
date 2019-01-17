@@ -1,0 +1,27 @@
+NMF with anchor word recovery:
+anchor-word-recovery
+
+LDA with VI:
+https://towardsdatascience.com/topic-modeling-and-latent-dirichlet-allocation-in-python-9bf156893c24 
+
+Make sure this is actually VI
+
+Modularity maximization with spectral clustering:
+https://github.com/zhiyzuo/python-modularity-maximization
+
+https://stackoverflow.com/questions/46258657/spectral-clustering-a-graph-in-python
+
+Code to write:
+Evaluating the joint PDFs
+Evaluating P(model | data)
+Visualizations of the results
+
+
+Datasets (UCI):
+-20 News
+-PMC
+-NYT
+-3 synth
+-50 synth
+
+-Look at more recent papers to verify these datasets are good
