@@ -51,7 +51,8 @@ def karate():
     print(metrics.adjusted_rand_score(gt, labels))
     print(metrics.adjusted_mutual_info_score(gt, labels))
 
-if __name__ == "__main__":
+#compute spectral clustering for newsgroup
+def newsgroup():
     file = open("../adjacency_newsgroup.pickle",'rb')
     adj_mat = pickle.load(file)
     file.close()
@@ -65,4 +66,48 @@ if __name__ == "__main__":
     # Compare ground-truth and clustering-results
     print('spectral clustering')
     print(labels)
+
+
+
+#compute spectral clustering for nyt
+def nyt():
+    file = open("../adjacency_nyt.pickle",'rb')
+    adj_mat = pickle.load(file)
+    file.close()
+
+    file = open("../dictionary_nyt.pickle",'rb')
+    dictionary = pickle.load(file)
+    file.close()
+
+    labels = computeSpectral(adj_mat, dictionary)
+
+    # Compare ground-truth and clustering-results
+    print('spectral clustering')
+    print(labels)
+
+
+
+
+#compute spectral clustering for nips
+def nips():
+    file = open("../adjacency_nips.pickle",'rb')
+    adj_mat = pickle.load(file)
+    file.close()
+
+    file = open("../dictionary_nips.pickle",'rb')
+    dictionary = pickle.load(file)
+    file.close()
+
+    labels = computeSpectral(adj_mat, dictionary)
+
+    # Compare ground-truth and clustering-results
+    print('spectral clustering')
+    print(labels)
+
+
+
+if __name__ == "__main__":
+    newsgroup()
+    nyt()
+    nips()
 

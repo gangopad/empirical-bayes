@@ -35,10 +35,8 @@ def computeLDA(bow_corpus, dictionary):
 
 
 
-
-if __name__ =="__main__":
-	#newsgroup()
-
+#runs LDA for newsgroup dataset
+def newsgroup():
     file = open("../bow_newsgroup.pickle",'rb')
     bow_corpus = pickle.load(file)
     file.close()
@@ -48,6 +46,38 @@ if __name__ =="__main__":
     file.close()
 
     computeLDA(bow_corpus, dictionary)
+
+
+#runs LDA for NYT dataset
+def nyt():
+    file = open("../bow_nyt.pickle",'rb')
+    bow_corpus = pickle.load(file)
+    file.close()
+
+    file = open("../dictionary_nyt.pickle",'rb')
+    dictionary = pickle.load(file)
+    file.close()
+
+    computeLDA(bow_corpus, dictionary)
+
+
+#runs LDA for NIPS dataset
+def nips():
+    file = open("../bow_nips.pickle",'rb')
+    bow_corpus = pickle.load(file)
+    file.close()
+
+    file = open("../dictionary_nips.pickle",'rb')
+    dictionary = pickle.load(file)
+    file.close()
+
+    computeLDA(bow_corpus, dictionary)
+
+
+if __name__ =="__main__":
+    newsgroup()
+    nyt()
+    nips()
 
 
 
