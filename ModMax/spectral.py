@@ -13,7 +13,7 @@ np.random.seed(1)
 #computes the spectral clusters
 def computeSpectral(adj_matrix, dictionary):
 	# Cluster
-	sc = SpectralClustering(2, affinity='precomputed', n_init=100)
+	sc = SpectralClustering(12, affinity='precomputed', n_init=100)
 	sc.fit(adj_mat)
 
 	# Compare ground-truth and clustering-results
@@ -23,7 +23,8 @@ def computeSpectral(adj_matrix, dictionary):
 	return sc.labels_
 
 
-if __name__ == "__main__":
+#runs spectral clustering over karate data and measures results
+def karate():
 	# Get your mentioned graph
 	G = nx.karate_club_graph()
 
@@ -53,3 +54,19 @@ if __name__ == "__main__":
 	# Calculate some clustering metrics
 	print(metrics.adjusted_rand_score(gt, labels))
 	print(metrics.adjusted_mutual_info_score(gt, labels))
+
+if __name__ == "__main__":
+	file = open("../adjacency_newsgroup.pickle",'rb')
+    adj_mat = pickle.load(file)
+    file.close()
+
+    file = open("../dictionary_newsgroup.pickle",'rb')
+    dictionary = pickle.load(file)
+    file.close()
+
+    labels = computeSpectral(adj_mat, dictionary)
+    
+	# Compare ground-truth and clustering-results
+	print('spectral clustering')
+	print(labels)
+
