@@ -19,6 +19,7 @@ nltk.download('wordnet')
 import pandas as pd
 stemmer = SnowballStemmer("english")
 import pickle
+import os
 
 
 #Write a function to perform the pre processing steps on the entire dataset
@@ -129,7 +130,7 @@ def NYT():
 def nips():
     processed_docs = []
     rootdir = "../data/nipstxt"
-    for dir in os.walk(rootdir):
+    for dir in os.listdir(rootdir):
         if "nips" in dir:
             for file in os.listdir(rootdir + "/" + dir):
                 with open(rootdir + "/" + dir + "/" + file) as f:
@@ -196,6 +197,6 @@ def newsgroup():
 
 
 if __name__ =="__main__":
-	newsgroup()
+    newsgroup()
     nyt()
     nips()
