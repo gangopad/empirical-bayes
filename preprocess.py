@@ -127,7 +127,30 @@ def NYT():
 
 #consider the set of NIPs abstracts
 def nips():
-    print "hello world"
+    processed_docs = []
+    rootdir = "../data/nipstxt"
+    for dir in os.walk(rootdir):
+        if "nips" in dir:
+            for file in os.listdir(rootdir + "/" + dir):
+                with open(rootdir + "/" + dir + "/" + file) as f:
+                    doc = f.read().strip()
+                    processed_docs.append(preprocess(doc))
+
+    (dictionary, bow_corpus, adj_mat) = serialize(processed_docs)
+
+    #dump objects via pickle
+    fname = open("bow_nips.pickle", "wb")
+    pickle.dump(bow_corpus, fname)
+    fname.close()
+
+    fname = open("dictionary_nips.pickle", "wb")
+    pickle.dump(dictionary, fname)
+    fname.close()
+
+    fname = open("adjacency_nips.pickle", "wb")
+    pickle.dump(adj_mat, fname)
+    fname.close()
+
 
 
 
@@ -174,3 +197,5 @@ def newsgroup():
 
 if __name__ =="__main__":
 	newsgroup()
+    nyt()
+    nips()
