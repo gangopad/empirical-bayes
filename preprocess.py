@@ -72,7 +72,7 @@ def newsgroup():
         processed_docs.append(preprocess(doc))
         
     #preview preprocessed docs
-    print(processed_docs[:2])
+    #print(processed_docs[:2])
 
     #create dictionary with frequency counts
     dictionary = gensim.corpora.Dictionary(processed_docs)
@@ -118,6 +118,11 @@ def newsgroup():
     """
     Convert BOW to adjacency matrix and store documents by index
     """
+    dictionary_index = dictionary.values()
+    for doc in bow_corpus:
+        print "DOC"
+        print doc
+        break
 
     #dump objects via pickle
     fname = open("bow_newsgroup.pickle", "wb")
