@@ -1,6 +1,6 @@
 """
-We run LDA on various datasets and generate the topic matrix A in a serialized
-file
+We run LDA with online variational bayes on various datasets and generate the topic matrix 
+A in a serialized file
 """
 
 from sklearn.datasets import fetch_20newsgroups
@@ -34,6 +34,7 @@ def preprocess(text):
     return result
 
 
+
 #computes LDA given bag-of-words
 def computeLDA(bow_corpus, dictionary):
 
@@ -54,6 +55,12 @@ def computeLDA(bow_corpus, dictionary):
     for idx, topic in lda_model.print_topics(-1):
         print("Topic: {} \nWords: {}".format(idx, topic ))
         print("\n")
+
+
+
+#we consider the NYT corpus
+def NYT():
+    print("hello world")
 
 
 #we consider the 20newsgroup dataset
@@ -120,7 +127,7 @@ def newsgroup():
                                                      dictionary[bow_doc_x[i][0]], 
                                                      bow_doc_x[i][1]))
 
-    computelDA(bow_corpus, dictionary)
+    computeLDA(bow_corpus, dictionary)
 
 
 if __name__ =="__main__":
