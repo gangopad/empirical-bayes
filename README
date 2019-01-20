@@ -18,10 +18,13 @@ Visualizations of the results
 
 
 Datasets (UCI):
--20 News
--PMC
+-20 News: https://scikit-learn.org/0.19/datasets/twenty_newsgroups.html
+-NIPS Abstracts
 -NYT
 -3 synth
 -50 synth
 
 -Look at more recent papers to verify these datasets are good
+
+Visualizations:
+Multiple bar charts: https://pythonspot.com/matplotlib-bar-chart/
