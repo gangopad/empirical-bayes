@@ -8,55 +8,55 @@ import networkx as nx
 from sklearn.cluster import SpectralClustering
 from sklearn import metrics
 np.random.seed(1)
-
+import pickle
 
 #computes the spectral clusters
 def computeSpectral(adj_matrix, dictionary):
-	# Cluster
-	sc = SpectralClustering(12, affinity='precomputed', n_init=100)
-	sc.fit(adj_mat)
+    # Cluster
+    sc = SpectralClustering(12, affinity='precomputed', n_init=100)
+    sc.fit(adj_mat)
 
-	# Compare ground-truth and clustering-results
-	print('spectral clustering')
-	print(sc.labels_)
+    # Compare ground-truth and clustering-results
+    print('spectral clustering')
+    print(sc.labels_)
 
-	return sc.labels_
+    return sc.labels_
 
 
 #runs spectral clustering over karate data and measures results
 def karate():
-	# Get your mentioned graph
-	G = nx.karate_club_graph()
+    # Get your mentioned graph
+    G = nx.karate_club_graph()
 
-	# Get ground-truth: club-labels -> transform to 0/1 np-array
-	#     (possible overcomplicated networkx usage here)
-	gt_dict = nx.get_node_attributes(G, 'club')
-	gt = [gt_dict[i] for i in G.nodes()]
-	gt = np.array([0 if i == 'Mr. Hi' else 1 for i in gt])
+    # Get ground-truth: club-labels -> transform to 0/1 np-array
+    #     (possible overcomplicated networkx usage here)
+    gt_dict = nx.get_node_attributes(G, 'club')
+    gt = [gt_dict[i] for i in G.nodes()]
+    gt = np.array([0 if i == 'Mr. Hi' else 1 for i in gt])
+    
+    # Get adjacency-matrix as numpy-array
+    adj_mat = nx.to_numpy_matrix(G)
 
-	# Get adjacency-matrix as numpy-array
-	adj_mat = nx.to_numpy_matrix(G)
+    print("The shape of the adjacency-matrix" + str(adj_mat.shape))
 
-	print("The shape of the adjacency-matrix" + str(adj_mat.shape))
+    print('ground truth')
+    print(gt)
+    
 
-	print('ground truth')
-	print(gt)
+    labels = computeSpectral(adj_mat, None)
 
-
-	labels = computeSpectral(adj_mat, None)
-
-	# Compare ground-truth and clustering-results
-	print('spectral clustering')
-	print(labels)
-	print('just for better-visualization: invert clusters (permutation)')
-	print(np.abs(labels - 1))
-
-	# Calculate some clustering metrics
-	print(metrics.adjusted_rand_score(gt, labels))
-	print(metrics.adjusted_mutual_info_score(gt, labels))
+    # Compare ground-truth and clustering-results
+    print('spectral clustering')
+    print(labels)
+    print('just for better-visualization: invert clusters (permutation)')
+    print(np.abs(labels - 1))
+	
+    # Calculate some clustering metrics
+    print(metrics.adjusted_rand_score(gt, labels))
+    print(metrics.adjusted_mutual_info_score(gt, labels))
 
 if __name__ == "__main__":
-	file = open("../adjacency_newsgroup.pickle",'rb')
+    file = open("../adjacency_newsgroup.pickle",'rb')
     adj_mat = pickle.load(file)
     file.close()
 
@@ -65,8 +65,8 @@ if __name__ == "__main__":
     file.close()
 
     labels = computeSpectral(adj_mat, dictionary)
-    
-	# Compare ground-truth and clustering-results
-	print('spectral clustering')
-	print(labels)
+
+    # Compare ground-truth and clustering-results
+    print('spectral clustering')
+    print(labels)
 
