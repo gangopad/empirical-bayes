@@ -16,10 +16,6 @@ def computeSpectral(adj_matrix, dictionary):
     sc = SpectralClustering(12, affinity='precomputed', n_init=100)
     sc.fit(adj_mat)
 
-    # Compare ground-truth and clustering-results
-    print('spectral clustering')
-    print(sc.labels_)
-
     return sc.labels_
 
 

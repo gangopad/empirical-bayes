@@ -36,41 +36,8 @@ def preprocess(text):
     return result
 
 
-
-
-#consider the NYT dataset
-def NYT():
-    print "hello world"
-
-
-
-#consider the set of NIPs abstracts
-def nips():
-    print "hello world"
-
-
-
-#we consider the 20newsgroup dataset
-def newsgroup():
-    newsgroups_train = fetch_20newsgroups(subset='train', shuffle = True)
-    newsgroups_test = fetch_20newsgroups(subset='test', shuffle = True)
-
-    """
-    #dataset info
-    print(list(newsgroups_train.target_names))
-    print(newsgroups_train.data[:2])
-    print(newsgroups_train.filenames.shape, newsgroups_train.target.shape)
-    """
-
-
-    #test
-    #print(WordNetLemmatizer().lemmatize('went', pos = 'v')) # past tense to present tense
-
-    #preprocess the data
-    processed_docs = []
-    for doc in newsgroups_train.data:
-        processed_docs.append(preprocess(doc))
-        
+#takes the preprocessed data and returns the appropriate objects
+def serialize(processed_docs):
     #preview preprocessed docs
     #print(processed_docs[:2])
 
@@ -82,8 +49,8 @@ def newsgroup():
     count = 0
     for k, v in dictionary.iteritems():
         print(k, v)
-    	count += 1
-    	if count > 10:
+        count += 1
+        if count > 10:
             break
 
 
@@ -126,6 +93,67 @@ def newsgroup():
                 val = val + 1
                 adj_mat[word1[0], word2[0]] = val
 
+
+    return dictionary, bow_corpus, adj_mat
+
+
+#consider the NYT dataset
+def NYT():
+    processed_docs = []
+
+    with open("../data/nytimes_news_articles.txt") as f:
+        for line in f:
+            if "URL:" not in line:
+                doc = line.strip()
+                processed_docs.append(preprocess(doc))
+
+    (dictionary, bow_corpus, adj_mat) = serialize(processed_docs)
+
+    #dump objects via pickle
+    fname = open("bow_nyt.pickle", "wb")
+    pickle.dump(bow_corpus, fname)
+    fname.close()
+
+    fname = open("dictionary_nyt.pickle", "wb")
+    pickle.dump(dictionary, fname)
+    fname.close()
+
+    fname = open("adjacency_nyt.pickle", "wb")
+    pickle.dump(adj_mat, fname)
+    fname.close()
+
+
+
+
+#consider the set of NIPs abstracts
+def nips():
+    print "hello world"
+
+
+
+#we consider the 20newsgroup dataset
+def newsgroup():
+    newsgroups_train = fetch_20newsgroups(subset='train', shuffle = True)
+    newsgroups_test = fetch_20newsgroups(subset='test', shuffle = True)
+
+    """
+    #dataset info
+    print(list(newsgroups_train.target_names))
+    print(newsgroups_train.data[:2])
+    print(newsgroups_train.filenames.shape, newsgroups_train.target.shape)
+    """
+
+
+    #test
+    #print(WordNetLemmatizer().lemmatize('went', pos = 'v')) # past tense to present tense
+
+    #preprocess the data
+    processed_docs = []
+    for doc in newsgroups_train.data:
+        processed_docs.append(preprocess(doc))
+        
+    
+    (dictionary, bow_corpus, adj_mat) = serialize(processed_docs)
 
 
     #dump objects via pickle
