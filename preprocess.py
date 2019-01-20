@@ -21,6 +21,22 @@ stemmer = SnowballStemmer("english")
 import pickle
 
 
+#Write a function to perform the pre processing steps on the entire dataset
+def lemmatize_stemming(text):
+    return stemmer.stem(WordNetLemmatizer().lemmatize(text, pos='v'))
+
+
+# Tokenize and lemmatize
+def preprocess(text):
+    result=[]
+    for token in gensim.utils.simple_preprocess(text) :
+        if token not in gensim.parsing.preprocessing.STOPWORDS and len(token) > 3:
+            result.append(lemmatize_stemming(token))
+            
+    return result
+
+
+
 
 #consider the NYT dataset
 def NYT():
