@@ -118,11 +118,15 @@ def newsgroup():
     """
     Convert BOW to adjacency matrix and store documents by index
     """
-    dictionary_index = dictionary.values()
+    adj_mat = np.zeros((len(dictionary), len(dictionary)))
     for doc in bow_corpus:
-        print "DOC"
-        print doc
-        break
+        for word1 in doc:
+            for word2 in doc:
+                val = adj_mat.item((word1[0], word2[0]))
+                val = val + 1
+                adj_mat[word1[0], word2[0]] = val
+
+
 
     #dump objects via pickle
     fname = open("bow_newsgroup.pickle", "wb")
@@ -131,6 +135,10 @@ def newsgroup():
 
     fname = open("dictionary_newsgroup.pickle", "wb")
     pickle.dump(dictionary, fname)
+    fname.close()
+
+    fname = open("adjacency_newsgroup.pickle", "wb")
+    pickle.dump(adj_mat, fname)
     fname.close()
 
 
