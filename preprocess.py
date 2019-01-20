@@ -1,6 +1,8 @@
 """
-We run LDA with online variational bayes on various datasets and generate the topic matrix 
-A in a serialized file
+Preprocesses the input datasets and outputs serialized 
+objects represented cleaned data
+1) Adjacency matrix
+2) Bag of words 
 """
 
 from sklearn.datasets import fetch_20newsgroups
@@ -16,51 +18,20 @@ import nltk
 nltk.download('wordnet')
 import pandas as pd
 stemmer = SnowballStemmer("english")
+import pickle
 
 
 
-#Write a function to perform the pre processing steps on the entire dataset
-def lemmatize_stemming(text):
-    return stemmer.stem(WordNetLemmatizer().lemmatize(text, pos='v'))
-
-
-# Tokenize and lemmatize
-def preprocess(text):
-    result=[]
-    for token in gensim.utils.simple_preprocess(text) :
-        if token not in gensim.parsing.preprocessing.STOPWORDS and len(token) > 3:
-            result.append(lemmatize_stemming(token))
-            
-    return result
-
-
-
-#computes LDA given bag-of-words
-def computeLDA(bow_corpus, dictionary):
-
-    """
-    # LDA mono-core -- fallback code in case LdaMulticore throws an error on your machine
-    lda_model = gensim.models.LdaModel(bow_corpus, num_topics = 10, id2word = dictionary, passes = 50)
-    """
-
-    """
-    # LDA multicore 
-    Train your lda model using gensim.models.LdaMulticore and save it to 'lda_model'
-    """
-    lda_model =  gensim.models.LdaMulticore(bow_corpus, num_topics = 8, id2word = dictionary, passes = 10, workers = 2)
-
-    """
-    For each topic, we will explore the words occuring in that topic and its relative weight
-    """
-    for idx, topic in lda_model.print_topics(-1):
-        print("Topic: {} \nWords: {}".format(idx, topic ))
-        print("\n")
-
-
-
-#we consider the NYT corpus
+#consider the NYT dataset
 def NYT():
-    print("hello world")
+    print "hello world"
+
+
+
+#consider the set of NIPs abstracts
+def nips():
+    print "hello world"
+
 
 
 #we consider the 20newsgroup dataset
@@ -127,22 +98,17 @@ def newsgroup():
                                                      dictionary[bow_doc_x[i][0]], 
                                                      bow_doc_x[i][1]))
 
-    computeLDA(bow_corpus, dictionary)
+    #dump objects via pickle
+    fname = open("bow_newsgroup.pickle", "wb")
+    pickle.dump(bow_corpus, fname)
+    fname.close()
+
+    fname = open("dictionary_newsgroup.pickle", "wb")
+    pickle.dump(dictionary, fname)
+    fname.close()
+
+
 
 
 if __name__ =="__main__":
-	#newsgroup()
-
-    file = open("../bow_newsgroup.pickle",'rb')
-    bow_corpus = pickle.load(file)
-    file.close()
-
-    file = open("../dictionary_newsgroup.pickle",'rb')
-    dictionary = pickle.load(file)
-    file.close()
-
-    computeLDA(bow_corpus, dictionary)
-
-
-
-
+	newsgroup()

@@ -10,6 +10,17 @@ from sklearn import metrics
 np.random.seed(1)
 
 
+#computes the spectral clusters
+def computeSpectral(adj_matrix, dictionary):
+	# Cluster
+	sc = SpectralClustering(2, affinity='precomputed', n_init=100)
+	sc.fit(adj_mat)
+
+	# Compare ground-truth and clustering-results
+	print('spectral clustering')
+	print(sc.labels_)
+
+	return sc.labels_
 
 
 if __name__ == "__main__":
@@ -25,19 +36,20 @@ if __name__ == "__main__":
 	# Get adjacency-matrix as numpy-array
 	adj_mat = nx.to_numpy_matrix(G)
 
+	print("The shape of the adjacency-matrix" + str(adj_mat.shape))
+
 	print('ground truth')
 	print(gt)
 
-	# Cluster
-	sc = SpectralClustering(2, affinity='precomputed', n_init=100)
-	sc.fit(adj_mat)
+
+	labels = computeSpectral(adj_mat, None)
 
 	# Compare ground-truth and clustering-results
 	print('spectral clustering')
-	print(sc.labels_)
+	print(labels)
 	print('just for better-visualization: invert clusters (permutation)')
-	print(np.abs(sc.labels_ - 1))
+	print(np.abs(labels - 1))
 
 	# Calculate some clustering metrics
-	print(metrics.adjusted_rand_score(gt, sc.labels_))
-	print(metrics.adjusted_mutual_info_score(gt, sc.labels_))
+	print(metrics.adjusted_rand_score(gt, labels))
+	print(metrics.adjusted_mutual_info_score(gt, labels))
