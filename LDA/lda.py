@@ -34,6 +34,28 @@ def preprocess(text):
     return result
 
 
+#computes LDA given bag-of-words
+def computeLDA(bow_corpus, dictionary):
+
+    """
+    # LDA mono-core -- fallback code in case LdaMulticore throws an error on your machine
+    lda_model = gensim.models.LdaModel(bow_corpus, num_topics = 10, id2word = dictionary, passes = 50)
+    """
+
+    """
+    # LDA multicore 
+    Train your lda model using gensim.models.LdaMulticore and save it to 'lda_model'
+    """
+    lda_model =  gensim.models.LdaMulticore(bow_corpus, num_topics = 8, id2word = dictionary, passes = 10, workers = 2)
+
+    """
+    For each topic, we will explore the words occuring in that topic and its relative weight
+    """
+    for idx, topic in lda_model.print_topics(-1):
+        print("Topic: {} \nWords: {}".format(idx, topic ))
+        print("\n")
+
+
 #we consider the 20newsgroup dataset
 def newsgroup():
     newsgroups_train = fetch_20newsgroups(subset='train', shuffle = True)
@@ -97,6 +119,8 @@ def newsgroup():
         print("Word {} (\"{}\") appears {} time.".format(bow_doc_x[i][0], 
                                                      dictionary[bow_doc_x[i][0]], 
                                                      bow_doc_x[i][1]))
+
+    computelDA(bow_corpus, dictionary)
 
 
 if __name__ =="__main__":
