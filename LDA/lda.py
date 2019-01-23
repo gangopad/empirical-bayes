@@ -10,10 +10,13 @@ import numpy as np
 np.random.seed(400)
 import pandas as pd
 import pickle
+import math
 
 
 #computes LDA given bag-of-words
 def computeLDA(bow_corpus, dictionary):
+    N = len(bow_corpus)
+    train = int(0.7 * N)
 
     """
     # LDA mono-core -- fallback code in case LdaMulticore throws an error on your machine
@@ -24,7 +27,7 @@ def computeLDA(bow_corpus, dictionary):
     # LDA multicore 
     Train your lda model using gensim.models.LdaMulticore and save it to 'lda_model'
     """
-    lda_model =  gensim.models.LdaMulticore(bow_corpus, num_topics = 8, id2word = dictionary, passes = 10, workers = 2)
+    lda_model =  gensim.models.LdaMulticore(bow_corpus[:train], num_topics = 8, id2word = dictionary, passes = 10, workers = 2)
 
     """
     For each topic, we will explore the words occuring in that topic and its relative weight
@@ -33,6 +36,50 @@ def computeLDA(bow_corpus, dictionary):
         print("Topic: {} \nWords: {}".format(idx, topic ))
         print("\n")
 
+    probs = computeProb(lda_model, bow_corpus)
+
+    unseen_lda = lda_model[bow_corpus[train:]]
+
+
+
+#computes P(d_{i}) given the multinomial and beta LDA parameters
+def computeDocProb(mult, beta):
+    doc_prob = 0
+
+    #we first convert mult to hashmap of topic index to prob
+    hash_mult = dict()
+    for topic in mult:
+        topic_index = topic[0]
+        topic_prob = topic[1]
+        hash_mult[topic_index] = topic_prob
+
+    for word in beta:
+        word_prob = 0.0
+        word_index = word[0]
+        word_topic_probs = word[1]
+
+        for prob in word_topic_probs:
+            topic_index = prob[0]
+            word_topic_prob = prob[1]
+            word_prob = word_prob + (float(hash_mult[topic_index]) * float(word_topic_prob))
+
+        doc_prob = doc_prob + math.log(word_prob, 2)
+
+    return doc_prob
+
+
+#computes the log probability of the corpus P(D)
+def computeProb(lda_model, bow_corpus):
+    log_prob = 0.0
+    for doc in bow_corpus:
+        params = lda_model.get_document_topics(doc, per_word_topics=True)
+        mult = params[0]
+        beta = params[2]
+
+        doc_prob = computeDocProb(mult, beta)
+        log_prob = log_prob + doc_prob
+
+    return log_prob
 
 
 #runs LDA for newsgroup dataset
@@ -45,7 +92,7 @@ def newsgroup():
     dictionary = pickle.load(file)
     file.close()
 
-    computeLDA(bow_corpus, dictionary)
+    (probs, held_out_probs, coherence, topics) = computeLDA(bow_corpus, dictionary)
 
 
 #runs LDA for NYT dataset
@@ -58,7 +105,7 @@ def nyt():
     dictionary = pickle.load(file)
     file.close()
 
-    computeLDA(bow_corpus, dictionary)
+    (probs, held_out_probs, coherence, topics) = computeLDA(bow_corpus, dictionary)
 
 
 #runs LDA for NIPS dataset
@@ -71,7 +118,7 @@ def nips():
     dictionary = pickle.load(file)
     file.close()
 
-    computeLDA(bow_corpus, dictionary)
+    (probs, held_out_probs, coherence, topics) = computeLDA(bow_corpus, dictionary)
 
 
 if __name__ =="__main__":
