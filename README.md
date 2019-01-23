@@ -1,6 +1,7 @@
 
-Code for novel empirical bayes and model selection framework 
+# Code for novel empirical bayes and model selection framework # 
 
+## Methods ##
 NMF with anchor word recovery:
 anchor-word-recovery. Code from: https://cs.nyu.edu/~halpern/code.html
 
@@ -11,7 +12,7 @@ Modularity maximization with spectral clustering uses the spectral clustering pa
 
 
 
-
+## Data ##
 -20 News: https://scikit-learn.org/0.19/datasets/twenty_newsgroups.html
 -NIPS Abstracts
 -NYT
@@ -19,4 +20,5 @@ Modularity maximization with spectral clustering uses the spectral clustering pa
 -synth2
 
 
+## Contact ##
 For more information on datasets, running the code contact Anirban Gangopadhyay at gangopad@gmail.com
