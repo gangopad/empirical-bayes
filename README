@@ -1,30 +1,22 @@
+
+Code for novel empirical bayes and model selection framework 
+
 NMF with anchor word recovery:
 anchor-word-recovery. Code from: https://cs.nyu.edu/~halpern/code.html
 
-LDA with VI:
-https://towardsdatascience.com/topic-modeling-and-latent-dirichlet-allocation-in-python-9bf156893c24 
-
-Make sure this is actually VI
-
-Modularity maximization with spectral clustering:
-https://github.com/zhiyzuo/python-modularity-maximization
-
-https://stackoverflow.com/questions/46258657/spectral-clustering-a-graph-in-python
-
-Code to write:
-Evaluating the joint PDFs
-Evaluating P(model | data)
-Visualizations of the results
+LDA with VI uses Gensim and online variational Bayes
 
 
-Datasets (UCI):
+Modularity maximization with spectral clustering uses the spectral clustering package in networkx
+
+
+
+
 -20 News: https://scikit-learn.org/0.19/datasets/twenty_newsgroups.html
 -NIPS Abstracts
 -NYT
--3 synth
--50 synth
+-synth1
+-synth2
 
--Look at more recent papers to verify these datasets are good
 
-Visualizations:
-Multiple bar charts: https://pythonspot.com/matplotlib-bar-chart/
+For more information on datasets, running the code contact Anirban Gangopadhyay at gangopad@gmail.com
