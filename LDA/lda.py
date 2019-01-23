@@ -15,7 +15,7 @@ import sys
 
 
 #computes LDA given bag-of-words
-def computeLDA(bow_corpus, dictionary, cutoff):
+def computeLDA(bow_corpus, dictionary, cutoff, K):
     N = len(bow_corpus)
     train = int(0.7 * N)
 
@@ -28,7 +28,7 @@ def computeLDA(bow_corpus, dictionary, cutoff):
     # LDA multicore 
     Train your lda model using gensim.models.LdaMulticore and save it to 'lda_model'
     """
-    lda_model =  gensim.models.LdaMulticore(bow_corpus[:train], num_topics = 8, id2word = dictionary, passes = 10, workers = 2)
+    lda_model =  gensim.models.LdaMulticore(bow_corpus[:train], num_topics = K, id2word = dictionary, passes = 10, workers = 2)
 
     """
     For each topic, we will explore the words occuring in that topic and its relative weight
@@ -56,7 +56,7 @@ def computeLDA(bow_corpus, dictionary, cutoff):
     for topic in coherence:
         print topic[1]
 
-    return probs, coherence, lda_model.print_topics(-1)
+    return probs, coherence, lda_model
 
 
 
@@ -113,7 +113,7 @@ def newsgroup(cutoff):
     dictionary = pickle.load(file)
     file.close()
 
-    (probs, coherence, topics) = computeLDA(bow_corpus, dictionary, cutoff)
+    (probs, coherence, topics) = computeLDA(bow_corpus, dictionary, cutoff, K)
 
     fout = open("../results.txt", "ab")
     fout.write("newsgroup lda" + str(prob))
@@ -135,7 +135,7 @@ def nyt(cutoff):
     dictionary = pickle.load(file)
     file.close()
 
-    (probs, coherence, topics) = computeLDA(bow_corpus, dictionary, cutoff)
+    (probs, coherence, topics) = computeLDA(bow_corpus, dictionary, cutoff, K)
 
     #write results to file
     fout = open("../results.txt", "ab")
@@ -149,7 +149,7 @@ def nyt(cutoff):
 
 
 #runs LDA for NIPS dataset
-def nips(cutoff):
+def nips(cutoff, K):
     file = open("../bow_nips.pickle",'rb')
     bow_corpus = pickle.load(file)
     file.close()
@@ -158,7 +158,7 @@ def nips(cutoff):
     dictionary = pickle.load(file)
     file.close()
 
-    (probs, coherence, topics) = computeLDA(bow_corpus, dictionary, cutoff)
+    (probs, coherence, topics) = computeLDA(bow_corpus, dictionary, cutoff, K)
 
     fout = open("../results.txt", "ab")
     fout.write("nips lda" + str(prob))
@@ -170,11 +170,88 @@ def nips(cutoff):
     fout.close()
 
 
+#runs LDA for synth1 dataset
+def synth1(cutoff, K):
+    file = open("../bow_synth1.pickle",'rb')
+    bow_corpus = pickle.load(file)
+    file.close()
+
+    file = open("../dictionary_synth1.pickle",'rb')
+    dictionary = pickle.load(file)
+    file.close()
+
+    (probs, coherence, topics) = computeLDA(bow_corpus, dictionary, cutoff, K)
+
+    fout = open("../synth_results.txt", "ab")
+    fout.write("synth1 lda" + str(prob))
+
+    for topic in coherence:
+        fout.write(str(topic[i]) + " ")
+
+    fout.write("\n")
+    fout.close()
+
+
+    fout.open("synth1_l1.txt")
+    fout.write("lda:")
+
+    topic_mat = np.zeros((K, len(dictionary)))
+    for i in range(K):
+        words = lda.get_topic_terms(i)
+        for word in words:
+            word_index = word[0]
+                topic_mat[i, word_index] = 1
+
+    for el in topic_mat.flatten():
+        fout.write(str(el) + " ")
+
+    fout.close()
+
+
+#runs LDA for synth2 dataset
+def synth2(cutoff, K):
+    file = open("../bow_synth2.pickle",'rb')
+    bow_corpus = pickle.load(file)
+    file.close()
+
+    file = open("../dictionary_synth2.pickle",'rb')
+    dictionary = pickle.load(file)
+    file.close()
+
+    (probs, coherence, topics) = computeLDA(bow_corpus, dictionary, cutoff, K)
+
+    fout = open("../results.txt", "ab")
+    fout.write("synth2 lda" + str(prob))
+
+    for topic in coherence:
+        fout.write(str(topic[i]) + " ")
+
+    fout.write("\n")
+    fout.close()
+
+    fout.open("synth2_l1.txt")
+    fout.write("lda:")
+
+    topic_mat = np.zeros((K, len(dictionary)))
+    for i in range(K):
+        words = lda.get_topic_terms(i)
+        for word in words:
+            word_index = word[0]
+                topic_mat[i, word_index] = 1
+
+    for el in topic_mat.flatten():
+        fout.write(str(el) + " ")
+
+    fout.close()
+
+
 if __name__ =="__main__":
     cutoff = float(sys.argv[1]) #this parameter is intended to prevent underflow issues in probability computation
-    newsgroup(cutoff)
-    nyt(cutoff)
-    nips(cutoff)
+    newsgroup(cutoff, 10)
+    nyt(cutoff, 10)
+    nips(cutoff, 10)
+    synth1(cutoff, 10)
+    synth2(cutoff, 10)
 
 
 

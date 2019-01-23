@@ -184,11 +184,95 @@ def nips(cutoff):
     fout.close()
 
 
+#compute spectral clustering for synth1
+def synth1(cutoff, K):
+    file = open("../adjacency_synth1.pickle",'rb')
+    adj_mat = pickle.load(file)
+    file.close()
+
+    file = open("../dictionary_synth1.pickle",'rb')
+    dictionary = pickle.load(file)
+    file.close()
+
+    probs, coherence, labels = computeSpectral(adj_mat, dictionary, cutoff)
+
+    # Compare ground-truth and clustering-results
+    print('spectral clustering')
+    print(labels)
+
+    fout = open("../synth_results.txt", "ab")
+    fout.write("synth1 modmax" + str(prob))
+
+    for i in range(0,len(coherence)):
+        fout.write(str(coherence[i]) + " ")
+
+    fout.write("\n")
+    fout.close()
+
+    fout.open("synth1_l1.txt")
+    fout.write("modmax:")
+
+    topic_mat = np.zeros((K, len(dictionary)))
+    for i in range(K):
+        for j in range(labels):
+            if i == j:
+                topic_mat[K,j] = 1
+
+    for el in topic_mat.flatten():
+        fout.write(str(el) + " ")
+
+    fout.close()
+
+
+#compute spectral clustering for synth1
+def synth2(cutoff, K):
+    file = open("../adjacency_synth2.pickle",'rb')
+    adj_mat = pickle.load(file)
+    file.close()
+
+    file = open("../dictionary_synth2.pickle",'rb')
+    dictionary = pickle.load(file)
+    file.close()
+
+    probs, coherence, labels = computeSpectral(adj_mat, dictionary, cutoff)
+
+    # Compare ground-truth and clustering-results
+    print('spectral clustering')
+    print(labels)
+
+    fout = open("../synth_results.txt", "ab")
+    fout.write("synth2 modmax" + str(prob))
+
+    for i in range(0,len(coherence)):
+        fout.write(str(coherence[i]) + " ")
+
+    fout.write("\n")
+    fout.close()
+
+    fout.open("synth2_l1.txt")
+    fout.write("modmax:")
+
+    topic_mat = np.zeros((K, len(dictionary)))
+    for i in range(K):
+        for j in range(labels):
+            if i == j:
+                topic_mat[K,j] = 1
+
+    for el in topic_mat.flatten():
+        fout.write(str(el) + " ")
+
+    fout.close()
+
+
+
+
 
 if __name__ == "__main__":
-
-    cutoff = float(sys.argv[1]) #this parameter is intended to prevent underflow issues in probability computation
+    K = float(sys.argv[1])
+    cutoff = float(sys.argv[2]) #this parameter is intended to prevent underflow issues in probability computation
     newsgroup(cutoff)
     nyt(cutoff)
     nips(cutoff)
+    synth1(cutoff, K)
+    synth2(cutoff, K)
 

@@ -72,7 +72,7 @@ def nips(N, M, r):
 	adj_mat = pickle.load(file)
 	file.close()
 
-	file = open("nips_term_doc.pickle", "rb")
+	file = open("../nips_term_doc.pickle", "rb")
 	term_doc = pickle.load(file)
 	file.close()
 
@@ -108,7 +108,7 @@ def newsgroup(N, r):
 	adj_mat = pickle.load(file)
 	file.close()
 
-	file = open("newsgroup_term_doc.pickle", "rb")
+	file = open("../newsgroup_term_doc.pickle", "rb")
 	term_doc = pickle.load(file)
 	file.close()
 
@@ -142,7 +142,7 @@ def nyt(N, r):
 	adj_mat = pickle.load(file)
 	file.close()
 
-	file = open("nyt_term_doc.pickle", "rb")
+	file = open("../nyt_term_doc.pickle", "rb")
 	term_doc = pickle.load(file)
 	file.close()
 
@@ -159,9 +159,108 @@ def nyt(N, r):
 	fout.close()
 
 
+#computes P(D) and coherence for the nyt dataset
+def synth1(N, r, cutoff):
+	A = np.zeros((N, r))
+	topic_mat = np.zeros((r, N)) #topic matrix used to compute L1 error
+	counter = 0
+
+	with open("L2_out.synth1.10.A") as f:
+		for line in f:
+			line = line.strip()
+			line = line.split()
+			for i in range(0,line):
+				A[counter, i] = float(line[i])
+
+				if float(line[i]) > cutoff:
+					topic_mat[i, counter] = 1
+
+			counter = counter + 1
+
+
+	file = open("M_synth1.full_docs.mat.trunc.mat", "rb")
+	adj_mat = pickle.load(file)
+	file.close()
+
+	file = open("../synth1_term_doc.pickle", "rb")
+	term_doc = pickle.load(file)
+	file.close()
+
+	prob = computeProb(term_doc, A)
+	coherence = computeCoherence(adj_mat, A, r)
+
+	fout = open("../synth_results.txt", "ab")
+	fout.write("synth1 nmf" + str(prob))
+
+	for i in range(0,K):
+		fout.write(str(coherence[i]) + " ")
+
+	fout.write("\n")
+	fout.close()
+
+	fout.open("synth1_l1.txt")
+    fout.write("nmf:")
+
+    for el in topic_mat.flatten():
+        fout.write(str(el) + " ")
+
+    fout.close()
+
+
+#computes P(D) and coherence for the nyt dataset
+def synth2(N, r, cutoff):
+	A = np.zeros((N, r))
+	topic_mat = np.zeros((r, N)) #topic matrix used to compute L1 error
+	counter = 0
+
+	with open("L2_out.synth2.10.A") as f:
+		for line in f:
+			line = line.strip()
+			line = line.split()
+			for i in range(0,line):
+				A[counter, i] = float(line[i])
+
+				if float(line[i]) > cutoff:
+					topic_mat[i, counter] = 1
+
+			counter = counter + 1
+
+
+	file = open("M_synth2.full_docs.mat.trunc.mat", "rb")
+	adj_mat = pickle.load(file)
+	file.close()
+
+	file = open("../synth2_term_doc.pickle", "rb")
+	term_doc = pickle.load(file)
+	file.close()
+
+	prob = computeProb(term_doc, A)
+	coherence = computeCoherence(adj_mat, A, r)
+
+	fout = open("../synth_results.txt", "ab")
+	fout.write("synth2 nmf" + str(prob))
+
+	for i in range(0,K):
+		fout.write(str(coherence[i]) + " ")
+
+	fout.write("\n")
+	fout.close()
+
+	fout.open("synth2_l1.txt")
+    fout.write("nmf:")
+
+    for el in topic_mat.flatten():
+        fout.write(str(el) + " ")
+
+    fout.close()
+
+
 if __name__ == "__main__":
 	N = float(sys.argv[1])
 	r = float(sys.argv[2])
+	cutoff = float(sys.argv[3])
 	newsgroup(N, r)
-    #nyt(N, r)
-    #nips(N, r)
+    nyt(N, r)
+    nips(N, r)
+    synth1(N, r, cutoff)
+    synth2(N, r, cutoff)
