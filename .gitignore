@@ -7,3 +7,6 @@ log.*
 *.topic_likelihoods
 *.txt
 *.txt.*
+*tmp*
+*~
+*temp*
