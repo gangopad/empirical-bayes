@@ -108,6 +108,6 @@ def nips():
 
 if __name__ == "__main__":
     newsgroup()
-    nyt()
-    nips()
+    #nyt()
+    #nips()
 

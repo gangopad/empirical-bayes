@@ -40,6 +40,12 @@ def computeLDA(bow_corpus, dictionary):
 
     unseen_lda = lda_model[bow_corpus[train:]]
 
+    coherence = lda_model.top_topics(bow_corpus)
+    print "Coherence"
+    print coherence
+
+    return probs, None, coherence, lda_model.print_topics(-1)
+
 
 
 #computes P(d_{i}) given the multinomial and beta LDA parameters
@@ -61,9 +67,12 @@ def computeDocProb(mult, beta):
         for prob in word_topic_probs:
             topic_index = prob[0]
             word_topic_prob = prob[1]
-            word_prob = word_prob + (float(hash_mult[topic_index]) * float(word_topic_prob))
+            if topic_index in hash_mult:
+                word_prob = word_prob + (float(hash_mult[topic_index]) * float(word_topic_prob))
 
-        doc_prob = doc_prob + math.log(word_prob, 2)
+        
+        if word_prob > 0:
+            doc_prob = doc_prob + math.log(word_prob, 2)
 
     return doc_prob
 
