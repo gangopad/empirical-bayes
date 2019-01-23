@@ -1,0 +1,7 @@
+*.pickle
+log.*
+*.pyc
+*.mat
+*.A
+*.topwords
+*.topic_likelihoods

@@ -11,9 +11,10 @@ np.random.seed(1)
 import pickle
 import scipy.stats
 import math
+import sys
 
 #computes the spectral clusters
-def computeSpectral(adj_mat, dictionary):
+def computeSpectral(adj_mat, dictionary, cutoff):
     G=nx.from_numpy_matrix(adj_mat)
     (r, c) = adj_mat.shape
 
@@ -26,13 +27,13 @@ def computeSpectral(adj_mat, dictionary):
     (omega, degrees) = computeOmega(adj_mat, sc.labels_, r, c)
     print "Computed omega"
 
-    probs = computeProb(omega, adj_mat, degrees, sc.labels_)
+    probs = computeProb(omega, adj_mat, cutoff)
     print "The computed P(D) is " + str(probs)
 
     coherence = computeCoherence(adj_mat, sc.labels_, degrees, K)
     print "The coherence is "
-    for topic in coherence:
-        print "For topic " + str(coherence.index(topic)) + " the coherence is " + str(topic)
+    for i in range(len(coherence)):
+        print "For topic " + str(i) + " the coherence is " + str(coherence[i])
 
 
     return probs, coherence, sc.labels_
@@ -43,13 +44,13 @@ def computeSpectral(adj_mat, dictionary):
 #computes omega 
 def computeOmega(adj_mat, labels, r, c):
     degrees = dict()
-    E = numpy.sum(adj_mat)
+    E = np.sum(adj_mat)
     E_cout = 0
-    omega = np.zeros(r, c)
+    omega = np.zeros((r, c))
     k_ci = dict() #k_{c_{i}} which represents the degree of connections outside the community fo node i
 
-    for node in range(0,r):
-        deg = numpy.sum(adj_mat[node:])
+    for node1 in range(0,r):
+        deg = np.sum(adj_mat[node:])
         degrees[node] = deg
         curr_label = labels[node]
         curr_k_ci = 0
@@ -89,53 +90,22 @@ def computeCoherence(adj_mat, labels, degrees, K):
 
 
 #computes P(D)
-def computeProb(omega, adj_mat):
+def computeProb(omega, adj_mat, cutoff):
     (r,c) = adj_mat.shape
     prob = 0
 
     for node1 in range(0,r):
         for node2 in range(0,c):
             edge_prob = scipy.stats.norm(omega[node1, node2], 1).pdf(adj_mat[node1, node2])
-            prob = prob + math.log(edge_prob, 2)
+
+            if edge_prob > cutoff:
+                prob = prob + math.log(edge_prob, 2)
 
     return prob
 
 
-
-#runs spectral clustering over karate data and measures results
-def karate():
-    # Get your mentioned graph
-    G = nx.karate_club_graph()
-
-    # Get ground-truth: club-labels -> transform to 0/1 np-array
-    #     (possible overcomplicated networkx usage here)
-    gt_dict = nx.get_node_attributes(G, 'club')
-    gt = [gt_dict[i] for i in G.nodes()]
-    gt = np.array([0 if i == 'Mr. Hi' else 1 for i in gt])
-    
-    # Get adjacency-matrix as numpy-array
-    adj_mat = nx.to_numpy_matrix(G)
-
-    print("The shape of the adjacency-matrix" + str(adj_mat.shape))
-
-    print('ground truth')
-    print(gt)
-    
-
-    labels = computeSpectral(adj_mat, None)
-
-    # Compare ground-truth and clustering-results
-    print('spectral clustering')
-    print(labels)
-    print('just for better-visualization: invert clusters (permutation)')
-    print(np.abs(labels - 1))
-	
-    # Calculate some clustering metrics
-    print(metrics.adjusted_rand_score(gt, labels))
-    print(metrics.adjusted_mutual_info_score(gt, labels))
-
 #compute spectral clustering for newsgroup
-def newsgroup():
+def newsgroup(cutoff):
     file = open("../adjacency_newsgroup.pickle",'rb')
     adj_mat = pickle.load(file)
     file.close()
@@ -144,7 +114,7 @@ def newsgroup():
     dictionary = pickle.load(file)
     file.close()
 
-    probs, coherence, labels = computeSpectral(adj_mat, dictionary)
+    probs, coherence, labels = computeSpectral(adj_mat, dictionary, cutoff)
 
     # Compare ground-truth and clustering-results
     print('spectral clustering')
@@ -153,7 +123,7 @@ def newsgroup():
 
 
 #compute spectral clustering for nyt
-def nyt():
+def nyt(cutoff):
     file = open("../adjacency_nyt.pickle",'rb')
     adj_mat = pickle.load(file)
     file.close()
@@ -162,7 +132,7 @@ def nyt():
     dictionary = pickle.load(file)
     file.close()
 
-    probs, coherence, labels = computeSpectral(adj_mat, dictionary)
+    probs, coherence, labels = computeSpectral(adj_mat, dictionary, cutoff)
 
     # Compare ground-truth and clustering-results
     print('spectral clustering')
@@ -172,7 +142,7 @@ def nyt():
 
 
 #compute spectral clustering for nips
-def nips():
+def nips(cutoff):
     file = open("../adjacency_nips.pickle",'rb')
     adj_mat = pickle.load(file)
     file.close()
@@ -181,7 +151,7 @@ def nips():
     dictionary = pickle.load(file)
     file.close()
 
-    probs, coherence, labels = computeSpectral(adj_mat, dictionary)
+    probs, coherence, labels = computeSpectral(adj_mat, dictionary, cutoff)
 
     # Compare ground-truth and clustering-results
     print('spectral clustering')
@@ -190,7 +160,9 @@ def nips():
 
 
 if __name__ == "__main__":
-    newsgroup()
-    #nyt()
-    #nips()
+
+    cutoff = float(sys.argv[1]) #this parameter is intended to prevent underflow issues in probability computation
+    newsgroup(cutoff)
+    nyt(cutoff)
+    nips(cutoff)
 
