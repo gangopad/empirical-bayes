@@ -103,18 +103,18 @@ def processSynthResults(fname):
 	n_groups = 2
 	xticks = ('Synth1', 'Synth2')
 	ylabel = 'Probability'
-	title = 'P(Model | Data) By Dataset'
+	title = 'P(Model | Data) By Synth Dataset'
 	fname = "synth_prob.png"
 
-	createPlot(n_groups, lda_synth_prob, modmax_synth_prob, nmf_synth_prob, ylabel, title, fname)
+	createPlot(n_groups, lda_synth_prob, modmax_synth_prob, nmf_synth_prob, ylabel, title, xticks, fname)
 
 	n_groups = 2
-	xticks = ('Synth1', 'Synth2', 'NIPs')
+	xticks = ('Synth1', 'Synth2')
 	ylabel = 'Coherence'
-	title = 'Coherence By Dataset'
+	title = 'Coherence By Synth Dataset'
 	fname = "synth_coherence.png"
 
-	createPlot(n_groups, lda_synth_coherence, modmax_synth_coherence, nmf_synth_coherence, ylabel, title, fname)
+	createPlot(n_groups, lda_synth_coherence, modmax_synth_coherence, nmf_synth_coherence, ylabel, title, xticks, fname)
 
 
 
@@ -235,7 +235,7 @@ def processL1(fname, title, K):
 
 
 if __name__ == "__main__":
-	
+
 	K = float(sys.argv[1])
 	processResults("results.txt")
 	processSynthResults("synth_results.txt")

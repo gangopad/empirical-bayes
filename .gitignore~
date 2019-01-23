@@ -5,3 +5,8 @@ log.*
 *.A
 *.topwords
 *.topic_likelihoods
+*.txt
+*.txt.*
+*tmp*
+*~
+*temp*
