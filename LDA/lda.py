@@ -38,7 +38,14 @@ def computeLDA(bow_corpus, dictionary):
 
     probs = computeProb(lda_model, bow_corpus)
 
+    """
+    #held out documents
     unseen_lda = lda_model[bow_corpus[train:]]
+    inference = lda_model.inference(bow_corpus)
+    print "Inference"
+    print inference[0]
+    print inference[0].shape
+    """
 
     coherence = lda_model.top_topics(bow_corpus)
     print "Coherence"
@@ -46,6 +53,22 @@ def computeLDA(bow_corpus, dictionary):
 
     return probs, None, coherence, lda_model.print_topics(-1)
 
+
+"""
+#computes P(d_{i}) assuming a single layer generative process ie a document
+is generated from the distribution of topics. We consider this to prevent 
+shrinking overall probability due to multiplicative effect of multi-layer models
+especially when comparing to a single layer model
+"""
+def computeDocProbSingleLayer(mult, beta):
+    doc_prob = 0
+    for topic in mult:
+        topic_index = topic[0]
+        topic_prob = topic[1]
+
+        doc_prob = doc_prob + topic_prob * prob_of_topic
+
+    return math.log(doc_prob, 2)
 
 
 #computes P(d_{i}) given the multinomial and beta LDA parameters
