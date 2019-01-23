@@ -120,6 +120,15 @@ def newsgroup(cutoff):
     print('spectral clustering')
     print(labels)
 
+    fout = open("../results.txt", "ab")
+    fout.write("newsgroup modmax" + str(prob))
+
+    for i in range(0,len(coherence)):
+        fout.write(str(coherence[i]) + " ")
+
+    fout.write("\n")
+    fout.close()
+
 
 
 #compute spectral clustering for nyt
@@ -138,6 +147,14 @@ def nyt(cutoff):
     print('spectral clustering')
     print(labels)
 
+    fout = open("../results.txt", "ab")
+    fout.write("nyt modmax" + str(prob))
+
+    for i in range(0,len(coherence)):
+        fout.write(str(coherence[i]) + " ")
+
+    fout.write("\n")
+    fout.close()
 
 
 
@@ -156,6 +173,15 @@ def nips(cutoff):
     # Compare ground-truth and clustering-results
     print('spectral clustering')
     print(labels)
+
+    fout = open("../results.txt", "ab")
+    fout.write("nips modmax" + str(prob))
+
+    for i in range(0,len(coherence)):
+        fout.write(str(coherence[i]) + " ")
+
+    fout.write("\n")
+    fout.close()
 
 
 

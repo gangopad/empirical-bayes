@@ -15,7 +15,7 @@ import sys
 
 
 #computes LDA given bag-of-words
-def computeLDA(bow_corpus, dictionary, sparsity):
+def computeLDA(bow_corpus, dictionary, cutoff):
     N = len(bow_corpus)
     train = int(0.7 * N)
 
@@ -37,7 +37,7 @@ def computeLDA(bow_corpus, dictionary, sparsity):
         print("Topic: {} \nWords: {}".format(idx, topic ))
         print("\n")
 
-    probs = computeProb(lda_model, bow_corpus, sparsity)
+    probs = computeProb(lda_model, bow_corpus, cutoff)
 
     print "P(D) is represented as: " + probs
 
@@ -61,7 +61,7 @@ def computeLDA(bow_corpus, dictionary, sparsity):
 
 
 #computes P(d_{i}) given the multinomial and beta LDA parameters
-def computeDocProb(mult, beta, sparsity):
+def computeDocProb(mult, beta, cutoff):
     doc_prob = 0
 
     #we first convert mult to hashmap of topic index to prob
@@ -83,28 +83,28 @@ def computeDocProb(mult, beta, sparsity):
                 word_prob = word_prob + (float(hash_mult[topic_index]) * float(word_topic_prob))
 
         
-        if word_prob > sparsity:
+        if word_prob > cutoff:
             doc_prob = doc_prob + math.log(word_prob, 2)
 
     return doc_prob
 
 
 #computes the log probability of the corpus P(D)
-def computeProb(lda_model, bow_corpus, sparsity):
+def computeProb(lda_model, bow_corpus, cutoff):
     log_prob = 0.0
     for doc in bow_corpus:
         params = lda_model.get_document_topics(doc, per_word_topics=True)
         mult = params[0]
         beta = params[2]
 
-        doc_prob = computeDocProb(mult, beta, sparsity)
+        doc_prob = computeDocProb(mult, beta, cutoff)
         log_prob = log_prob + doc_prob
 
     return log_prob
 
 
 #runs LDA for newsgroup dataset
-def newsgroup(sparsity):
+def newsgroup(cutoff):
     file = open("../bow_newsgroup.pickle",'rb')
     bow_corpus = pickle.load(file)
     file.close()
@@ -113,11 +113,20 @@ def newsgroup(sparsity):
     dictionary = pickle.load(file)
     file.close()
 
-    (probs, coherence, topics) = computeLDA(bow_corpus, dictionary)
+    (probs, coherence, topics) = computeLDA(bow_corpus, dictionary, cutoff)
+
+    fout = open("../results.txt", "ab")
+    fout.write("newsgroup lda" + str(prob))
+
+    for topic in coherence:
+        fout.write(str(topic[i]) + " ")
+
+    fout.write("\n")
+    fout.close()
 
 
 #runs LDA for NYT dataset
-def nyt(sparsity):
+def nyt(cutoff):
     file = open("../bow_nyt.pickle",'rb')
     bow_corpus = pickle.load(file)
     file.close()
@@ -126,11 +135,21 @@ def nyt(sparsity):
     dictionary = pickle.load(file)
     file.close()
 
-    (probs, coherence, topics) = computeLDA(bow_corpus, dictionary)
+    (probs, coherence, topics) = computeLDA(bow_corpus, dictionary, cutoff)
+
+    #write results to file
+    fout = open("../results.txt", "ab")
+    fout.write("nyt lda" + str(prob))
+
+    for topic in coherence:
+        fout.write(str(topic[i]) + " ")
+
+    fout.write("\n")
+    fout.close()
 
 
 #runs LDA for NIPS dataset
-def nips(sparsity):
+def nips(cutoff):
     file = open("../bow_nips.pickle",'rb')
     bow_corpus = pickle.load(file)
     file.close()
@@ -139,14 +158,23 @@ def nips(sparsity):
     dictionary = pickle.load(file)
     file.close()
 
-    (probs, coherence, topics) = computeLDA(bow_corpus, dictionary)
+    (probs, coherence, topics) = computeLDA(bow_corpus, dictionary, cutoff)
+
+    fout = open("../results.txt", "ab")
+    fout.write("nips lda" + str(prob))
+
+    for topic in coherence:
+        fout.write(str(topic[i]) + " ")
+
+    fout.write("\n")
+    fout.close()
 
 
 if __name__ =="__main__":
-    sparsity = float(sys.argv[1]) #this parameter is intended to prevent underflow issues in probability computation
-    newsgroup(sparsity)
-    nyt(sparsity)
-    nips(sparsity)
+    cutoff = float(sys.argv[1]) #this parameter is intended to prevent underflow issues in probability computation
+    newsgroup(cutoff)
+    nyt(cutoff)
+    nips(cutoff)
 
 
 
