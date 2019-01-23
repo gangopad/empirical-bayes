@@ -55,24 +55,8 @@ def computeLDA(bow_corpus, dictionary):
     for topic in coherence:
         print topic[1]
 
-    return probs, None, coherence, lda_model.print_topics(-1)
+    return probs, coherence, lda_model.print_topics(-1)
 
-
-"""
-#computes P(d_{i}) assuming a single layer generative process ie a document
-is generated from the distribution of topics. We consider this to prevent 
-shrinking overall probability due to multiplicative effect of multi-layer models
-especially when comparing to a single layer model
-"""
-def computeDocProbSingleLayer(mult, beta):
-    doc_prob = 0
-    for topic in mult:
-        topic_index = topic[0]
-        topic_prob = topic[1]
-
-        doc_prob = doc_prob + topic_prob * prob_of_topic
-
-    return math.log(doc_prob, 2)
 
 
 #computes P(d_{i}) given the multinomial and beta LDA parameters
@@ -128,7 +112,7 @@ def newsgroup():
     dictionary = pickle.load(file)
     file.close()
 
-    (probs, held_out_probs, coherence, topics) = computeLDA(bow_corpus, dictionary)
+    (probs, coherence, topics) = computeLDA(bow_corpus, dictionary)
 
 
 #runs LDA for NYT dataset
@@ -141,7 +125,7 @@ def nyt():
     dictionary = pickle.load(file)
     file.close()
 
-    (probs, held_out_probs, coherence, topics) = computeLDA(bow_corpus, dictionary)
+    (probs, coherence, topics) = computeLDA(bow_corpus, dictionary)
 
 
 #runs LDA for NIPS dataset
@@ -154,7 +138,7 @@ def nips():
     dictionary = pickle.load(file)
     file.close()
 
-    (probs, held_out_probs, coherence, topics) = computeLDA(bow_corpus, dictionary)
+    (probs, coherence, topics) = computeLDA(bow_corpus, dictionary)
 
 
 if __name__ =="__main__":
