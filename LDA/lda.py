@@ -38,6 +38,8 @@ def computeLDA(bow_corpus, dictionary):
 
     probs = computeProb(lda_model, bow_corpus)
 
+    print "P(D) is represented as: " + probs
+
     """
     #held out documents
     unseen_lda = lda_model[bow_corpus[train:]]
@@ -49,7 +51,9 @@ def computeLDA(bow_corpus, dictionary):
 
     coherence = lda_model.top_topics(bow_corpus)
     print "Coherence"
-    print coherence
+
+    for topic in coherence:
+        print topic[1]
 
     return probs, None, coherence, lda_model.print_topics(-1)
 
