@@ -123,7 +123,41 @@ def NYT():
     pickle.dump(adj_mat, fname)
     fname.close()
 
+    #dumping into textfile format for anchor-word-recovery scripts
+    fout = open("docword.nyt.txt", "wb")
+    fout.write(str(len(bow_corpus)))
+    fout.write(str(len(vocabulary)))
+    fout.write(str(np.count_nonzero(adj_mat)))
 
+    (r,c) = adj_mat.shape
+
+    for i in range(0, r):
+        for j in range(0, c):
+            fout.write(str(i) + " " + str(j) + " " + str(adj_mat[i, j]) + "\n")
+
+    fout.close()
+
+
+    #writing vocabulary file
+    fout = open("vocab.nyt.txt", "wb")
+    for term in dictionary:
+        fout.write(term + "\n")
+    fout.close()
+
+    #write term document matrix to file
+    termdoc = np.zeros((r, len(bow_corpus)))
+    for counter in range(len(bow_corpus)):
+        doc = bow_corpus[counter]
+
+        for i in range(doc):
+            word_index = doc[i][0]
+            freq = doc[i][1]
+
+            termdoc[counter, i] = freq
+
+    fname = open("nyt_term_doc.pickle", "wb")
+    pickle.dump(termdoc)
+    pickle.close()
 
 
 #consider the set of NIPs abstracts
@@ -152,6 +186,42 @@ def nips():
     pickle.dump(adj_mat, fname)
     fname.close()
 
+
+    #dumping into textfile format for anchor-word-recovery scripts
+    fout = open("docword.nips.txt", "wb")
+    fout.write(str(len(bow_corpus)))
+    fout.write(str(len(vocabulary)))
+    fout.write(str(np.count_nonzero(adj_mat)))
+
+    (r,c) = adj_mat.shape
+
+    for i in range(0, r):
+        for j in range(0, c):
+            fout.write(str(i) + " " + str(j) + " " + str(adj_mat[i, j]) + "\n")
+
+    fout.close()
+
+
+    #writing vocabulary file
+    fout = open("vocab.nips.txt", "wb")
+    for term in dictionary:
+        fout.write(term + "\n")
+    fout.close()
+
+    #write term document matrix to file
+    termdoc = np.zeros((r, len(bow_corpus)))
+    for counter in range(len(bow_corpus)):
+        doc = bow_corpus[counter]
+
+        for i in range(doc):
+            word_index = doc[i][0]
+            freq = doc[i][1]
+
+            termdoc[counter, i] = freq
+
+    fname = open("nips_term_doc.pickle", "wb")
+    pickle.dump(termdoc)
+    pickle.close()
 
 
 
@@ -192,6 +262,42 @@ def newsgroup():
     fname = open("adjacency_newsgroup.pickle", "wb")
     pickle.dump(adj_mat, fname)
     fname.close()
+
+    #dumping into textfile format for anchor-word-recovery scripts
+    fout = open("docword.newsgroup.txt", "wb")
+    fout.write(str(len(bow_corpus)))
+    fout.write(str(len(vocabulary)))
+    fout.write(str(np.count_nonzero(adj_mat)))
+
+    (r,c) = adj_mat.shape
+
+    for i in range(0, r):
+        for j in range(0, c):
+            fout.write(str(i) + " " + str(j) + " " + str(adj_mat[i, j]) + "\n")
+
+    fout.close()
+
+
+    #writing vocabulary file
+    fout = open("vocab.newsgroup.txt", "wb")
+    for term in dictionary:
+        fout.write(term + "\n")
+    fout.close()
+
+    #write term document matrix to file
+    termdoc = np.zeros((r, len(bow_corpus)))
+    for counter in range(len(bow_corpus)):
+        doc = bow_corpus[counter]
+
+        for i in range(doc):
+            word_index = doc[i][0]
+            freq = doc[i][1]
+
+            termdoc[counter, i] = freq
+
+    fname = open("newsgroup_term_doc.pickle", "wb")
+    pickle.dump(termdoc)
+    pickle.close()
 
 
 
