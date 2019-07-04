@@ -10,15 +10,31 @@ import scipy.stats
 from scipy.stats import multivariate_normal
 import pickle
 
+data_dir = "/Users/anirbang/DeltaSierra/Publications/EmpiricalBayes/data/"
+
+
+#gets the topic scores per document
+def getDocumentTopicBreakDown(w_i):
+	topic_scores = []
+
+	for i in range(len(w_i)):
+		topic_scores.append((i, w_i[i]))
+
+	return topic_scores
+
+
 #computes P(D)
 def computeProb(term_doc, A):
 	A_inv = pinv(A)
 	(N, num_docs) = term_doc.shape
 	R = np.zeros((num_docs, num_docs))
 	Q = 1/num_docs * np.dot(adj_mat, adj_mat.T)
+	document_topics = []
 
 	for row in term_doc:
 		w_i = np.dot(A_inv, row)
+		topic_scores = getDocumentTopicBreakDown(w_i)
+		document_topics.append(topic_scores)
 
 		R = R + np.dot(w_i.T, w_i)
 
@@ -29,7 +45,7 @@ def computeProb(term_doc, A):
 
 	prob = multivariate_normal.pdf(Q, mean=mu, cov=1)
 
-	return np.linalg.norm(prob)
+	return np.linalg.norm(prob), document_topics
 
 
 
@@ -38,9 +54,10 @@ def computeCoherence(adj_mat, A, K):
     coherence = np.zeros(K)
     epsilon = 0.01
     cutoff = 0.000001
+	(row, col) = adj_mat.shape
 
-    for r in range(0,k):
-    	for node1 in adj_mat:
+    for r in range(0,K):
+    	for node1 in range(0, row):
     		deg = np.sum(adj_mat[node1:])
         	for node2 in adj_mat:
             	if A[node1, r] > cutoff and A[node2, r] > cutoff:
@@ -53,83 +70,12 @@ def computeCoherence(adj_mat, A, K):
 
 	
 
-
-#computes P(D) and coherence for the nips dataset
-def nips(N, M, r):
-	A = np.zeros((N, r))
-	counter = 0
-
-	with open("L2_out.nips.10.A") as f:
-		for line in f:
-			line = line.strip()
-			line = line.split()
-			for i in range(0,line):
-				A[counter, i] = float(line[i])
-			counter = counter + 1
-
-
-	file = open("M_nips.full_docs.mat.trunc.mat", "rb")
-	adj_mat = pickle.load(file)
-	file.close()
-
-	file = open("../nips_term_doc.pickle", "rb")
-	term_doc = pickle.load(file)
-	file.close()
-
-	prob = computeProb(term_doc, A)
-	coherence = computeCoherence(adj_mat, A, r)
-
-	fout = open("../results.txt", "ab")
-	fout.write("nips nmf" + str(prob))
-
-	for i in range(0,K):
-		fout.write(str(coherence[i]) + " ")
-
-	fout.write("\n")
-	fout.close()
-
-
-
-#computes P(D) and coherence for newsgroup dataset
-def newsgroup(N, r):
-	A = np.zeros((N, r))
-	counter = 0
-
-	with open("L2_out.newsgroup.10.A") as f:
-		for line in f:
-			line = line.strip()
-			line = line.split()
-			for i in range(0,line):
-				A[counter, i] = float(line[i])
-			counter = counter + 1
-
-
-	file = open("M_newsgroup.full_docs.mat.trunc.mat", "rb")
-	adj_mat = pickle.load(file)
-	file.close()
-
-	file = open("../newsgroup_term_doc.pickle", "rb")
-	term_doc = pickle.load(file)
-	file.close()
-
-	prob = computeProb(term_doc, A)
-	coherence = computeCoherence(adj_mat, A, r)
-
-	fout = open("../results.txt", "ab")
-	fout.write("newsgroup nmf" + str(prob))
-
-	for i in range(0,K):
-		fout.write(str(coherence[i]) + " ")
-
-	fout.write("\n")
-	fout.close()
-
 #computes P(D) and coherence for the nyt dataset
-def nyt(N, r):
+def compute(N, r, dat_type):
 	A = np.zeros((N, r))
 	counter = 0
 
-	with open("L2_out.nyt.10.A") as f:
+	with open("L2_out." + dat_type + ".10.A") as f:
 		for line in f:
 			line = line.strip()
 			line = line.split()
@@ -138,129 +84,35 @@ def nyt(N, r):
 			counter = counter + 1
 
 
-	file = open("M_nyt.full_docs.mat.trunc.mat", "rb")
-	adj_mat = pickle.load(file)
-	file.close()
+	fname = open("M_" + dat_type + ".full_docs.mat.trunc.mat", "rb")
+	adj_mat = pickle.load(fname)
+	fname.close()
 
-	file = open("../nyt_term_doc.pickle", "rb")
-	term_doc = pickle.load(file)
-	file.close()
+    fname = open(os.path.join(data_dir,'processed/%s_term_doc.pickle'%dat_type),'rb')
+	term_doc = pickle.load(fname)
+	fname.close()
 
-	prob = computeProb(term_doc, A)
+	(prob, document_topics) = computeProb(term_doc, A)
 	coherence = computeCoherence(adj_mat, A, r)
 
-	fout = open("../results.txt", "ab")
-	fout.write("nyt nmf" + str(prob))
+    fout = open(os.path.join(data_dir,'processed/results.txt'), "ab")
+	fout.write(dat_type + " nmf" + str(prob))
 
-	for i in range(0,K):
+	for i in range(0,r):
 		fout.write(str(coherence[i]) + " ")
 
 	fout.write("\n")
 	fout.close()
 
-
-#computes P(D) and coherence for the nyt dataset
-def synth1(N, r, cutoff):
-	A = np.zeros((N, r))
-	topic_mat = np.zeros((r, N)) #topic matrix used to compute L1 error
-	counter = 0
-
-	with open("L2_out.synth1.10.A") as f:
-		for line in f:
-			line = line.strip()
-			line = line.split()
-			for i in range(0,line):
-				A[counter, i] = float(line[i])
-
-				if float(line[i]) > cutoff:
-					topic_mat[i, counter] = 1
-
-			counter = counter + 1
-
-
-	file = open("M_synth1.full_docs.mat.trunc.mat", "rb")
-	adj_mat = pickle.load(file)
-	file.close()
-
-	file = open("../synth1_term_doc.pickle", "rb")
-	term_doc = pickle.load(file)
-	file.close()
-
-	prob = computeProb(term_doc, A)
-	coherence = computeCoherence(adj_mat, A, r)
-
-	fout = open("../synth_results.txt", "ab")
-	fout.write("synth1 nmf" + str(prob))
-
-	for i in range(0,K):
-		fout.write(str(coherence[i]) + " ")
-
-	fout.write("\n")
-	fout.close()
-
-	fout.open("synth1_l1.txt")
-    fout.write("nmf:")
-
-    for el in topic_mat.flatten():
-        fout.write(str(el) + " ")
-
-    fout.close()
-
-
-#computes P(D) and coherence for the nyt dataset
-def synth2(N, r, cutoff):
-	A = np.zeros((N, r))
-	topic_mat = np.zeros((r, N)) #topic matrix used to compute L1 error
-	counter = 0
-
-	with open("L2_out.synth2.10.A") as f:
-		for line in f:
-			line = line.strip()
-			line = line.split()
-			for i in range(0,line):
-				A[counter, i] = float(line[i])
-
-				if float(line[i]) > cutoff:
-					topic_mat[i, counter] = 1
-
-			counter = counter + 1
-
-
-	file = open("M_synth2.full_docs.mat.trunc.mat", "rb")
-	adj_mat = pickle.load(file)
-	file.close()
-
-	file = open("../synth2_term_doc.pickle", "rb")
-	term_doc = pickle.load(file)
-	file.close()
-
-	prob = computeProb(term_doc, A)
-	coherence = computeCoherence(adj_mat, A, r)
-
-	fout = open("../synth_results.txt", "ab")
-	fout.write("synth2 nmf" + str(prob))
-
-	for i in range(0,K):
-		fout.write(str(coherence[i]) + " ")
-
-	fout.write("\n")
-	fout.close()
-
-	fout.open("synth2_l1.txt")
-    fout.write("nmf:")
-
-    for el in topic_mat.flatten():
-        fout.write(str(el) + " ")
-
-    fout.close()
+	fname = open(os.path.join(data_dir,'processed/%s_nmf_document_topics.pickle'%dat_type), "wb")
+    pickle.dump(document_topics, fname)
+    pickle.close()
 
 
 if __name__ == "__main__":
-	N = float(sys.argv[1])
-	r = float(sys.argv[2])
-	cutoff = float(sys.argv[3])
-	newsgroup(N, r)
-    nyt(N, r)
-    nips(N, r)
-    synth1(N, r, cutoff)
-    synth2(N, r, cutoff)
+	N = float(sys.argv[1]) #vocab size
+	r = float(sys.argv[2]) #number of topics
+	compute(N, r, "nips")
+    nyt(N, r, "newsgroup")
+    nips(N, r, "twitter")
+  

@@ -11,3 +11,4 @@ log.*
 *~
 *temp*
 *.png
+viz.py

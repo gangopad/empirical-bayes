@@ -12,13 +12,10 @@ Modularity maximization with spectral clustering uses the spectral clustering pa
 
 
 
-## Data ##
--20 News: https://scikit-learn.org/0.19/datasets/twenty_newsgroups.html
--NIPS Abstracts
--NYT
--synth1
--synth2
-
+## Real Data ##
+-Twitter (https://www.usna.edu/Users/cs/nchamber/data/twitter/)
+-20 newsgroup
+-NIPs
 
 ## Contact ##
 For more information on datasets, running the code contact Anirban Gangopadhyay at gangopad@gmail.com

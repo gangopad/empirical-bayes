@@ -22,6 +22,8 @@ import pickle
 import os
 
 
+data_dir = "/Users/anirbang/DeltaSierra/Publications/EmpiricalBayes/data/"
+
 #Write a function to perform the pre processing steps on the entire dataset
 def lemmatize_stemming(text):
     return stemmer.stem(WordNetLemmatizer().lemmatize(text, pos='v'))
@@ -98,35 +100,31 @@ def serialize(processed_docs):
     return dictionary, bow_corpus, adj_mat
 
 
-#consider the NYT dataset
-def NYT():
-    processed_docs = []
-
-    with open("../data/nytimes_news_articles.txt") as f:
-        for line in f:
-            if "URL:" not in line:
-                doc = line.strip()
-                processed_docs.append(preprocess(doc))
-
-    (dictionary, bow_corpus, adj_mat) = serialize(processed_docs)
-
+#writes the data to disk
+def write(dictionary, bow_corpus, adj_mat, labels, dat_type):
     #dump objects via pickle
-    fname = open("bow_nyt.pickle", "wb")
+
+    fname = open(os.path.join(data_dir,'processed/bow_%s.pickle'%dat_type), "wb")
     pickle.dump(bow_corpus, fname)
     fname.close()
 
-    fname = open("dictionary_nyt.pickle", "wb")
+    fname = open(os.path.join(data_dir,'processed/dictionary_%s.pickle'%dat_type), "wb")
     pickle.dump(dictionary, fname)
     fname.close()
 
-    fname = open("adjacency_nyt.pickle", "wb")
+    fname = open(os.path.join(data_dir,'processed/adjacency_%s.pickle'%dat_type), "wb")
     pickle.dump(adj_mat, fname)
     fname.close()
 
+    fname = open(os.path.join(data_dir,'processed/labels_%s.pickle'%dat_type), "wb")
+    pickle.dump(labels, fname)
+    fname.close()
+
+
     #dumping into textfile format for anchor-word-recovery scripts
-    fout = open("docword.nyt.txt", "wb")
+    fout = open(os.path.join(data_dir,'processed/docword.%s.txt'%dat_type), "wb")
     fout.write(str(len(bow_corpus)))
-    fout.write(str(len(vocabulary)))
+    fout.write(str(len(dictionary)))
     fout.write(str(np.count_nonzero(adj_mat)))
 
     (r,c) = adj_mat.shape
@@ -139,89 +137,68 @@ def NYT():
 
 
     #writing vocabulary file
-    fout = open("vocab.nyt.txt", "wb")
+    fout = open(os.path.join(data_dir,'processed/vocab.%s.txt'%dat_type), "wb")
     for term in dictionary:
-        fout.write(term + "\n")
+        fout.write(str(term) + "\n")
     fout.close()
 
     #write term document matrix to file
     termdoc = np.zeros((r, len(bow_corpus)))
+    print("the shape of termdoc is " + str(termdoc.shape))
     for counter in range(len(bow_corpus)):
         doc = bow_corpus[counter]
 
-        for i in range(doc):
+        for i in range(len(doc)):
             word_index = doc[i][0]
             freq = doc[i][1]
 
-            termdoc[counter, i] = freq
+            termdoc[i, counter] = freq
+            
 
-    fname = open("nyt_term_doc.pickle", "wb")
-    pickle.dump(termdoc)
-    pickle.close()
+    fname = open(os.path.join(data_dir,'processed/%s_term_doc.pickle'%dat_type), "wb")
+    pickle.dump(termdoc, fname)
+    fname.close()
+
+
+#consider the twitter dataset
+def twitter():
+    processed_docs = []
+    labels = []
+    fname = os.path.join(data_dir,'twitter.txt')
+
+
+    with open(fname) as f:
+        for line in f:
+            line = line.strip()
+
+            if "NOT" in line or "POLIT" in line:
+                line = line.split("\t")
+                doc = line[1]
+                label = line[0]
+                processed_docs.append(preprocess(doc))
+                labels.append(label)
+
+    (dictionary, bow_corpus, adj_mat) = serialize(processed_docs)
+    write(dictionary, bow_corpus, adj_mat, labels, "twitter")
 
 
 #consider the set of NIPs abstracts
 def nips():
     processed_docs = []
-    rootdir = "../data/nipstxt"
+    labels = []
+    rootdir = os.path.join(data_dir,'nipstxt')
+
     for dir in os.listdir(rootdir):
+        label = dir
         if "nips" in dir:
             for file in os.listdir(rootdir + "/" + dir):
                 with open(rootdir + "/" + dir + "/" + file) as f:
                     doc = f.read().strip()
                     processed_docs.append(preprocess(doc))
+                    labels.append(label)
 
     (dictionary, bow_corpus, adj_mat) = serialize(processed_docs)
-
-    #dump objects via pickle
-    fname = open("bow_nips.pickle", "wb")
-    pickle.dump(bow_corpus, fname)
-    fname.close()
-
-    fname = open("dictionary_nips.pickle", "wb")
-    pickle.dump(dictionary, fname)
-    fname.close()
-
-    fname = open("adjacency_nips.pickle", "wb")
-    pickle.dump(adj_mat, fname)
-    fname.close()
-
-
-    #dumping into textfile format for anchor-word-recovery scripts
-    fout = open("docword.nips.txt", "wb")
-    fout.write(str(len(bow_corpus)))
-    fout.write(str(len(vocabulary)))
-    fout.write(str(np.count_nonzero(adj_mat)))
-
-    (r,c) = adj_mat.shape
-
-    for i in range(0, r):
-        for j in range(0, c):
-            fout.write(str(i) + " " + str(j) + " " + str(adj_mat[i, j]) + "\n")
-
-    fout.close()
-
-
-    #writing vocabulary file
-    fout = open("vocab.nips.txt", "wb")
-    for term in dictionary:
-        fout.write(term + "\n")
-    fout.close()
-
-    #write term document matrix to file
-    termdoc = np.zeros((r, len(bow_corpus)))
-    for counter in range(len(bow_corpus)):
-        doc = bow_corpus[counter]
-
-        for i in range(doc):
-            word_index = doc[i][0]
-            freq = doc[i][1]
-
-            termdoc[counter, i] = freq
-
-    fname = open("nips_term_doc.pickle", "wb")
-    pickle.dump(termdoc)
-    pickle.close()
+    write(dictionary, bow_corpus, adj_mat, labels, "nips")
 
 
 
@@ -237,72 +214,25 @@ def newsgroup():
     print(newsgroups_train.filenames.shape, newsgroups_train.target.shape)
     """
 
-
     #test
     #print(WordNetLemmatizer().lemmatize('went', pos = 'v')) # past tense to present tense
 
     #preprocess the data
     processed_docs = []
+    labels = []
     for doc in newsgroups_train.data:
         processed_docs.append(preprocess(doc))
         
+
+    for label in newsgroups_train.target_names:
+        labels.append(label)
+
     
     (dictionary, bow_corpus, adj_mat) = serialize(processed_docs)
-
-
-    #dump objects via pickle
-    fname = open("bow_newsgroup.pickle", "wb")
-    pickle.dump(bow_corpus, fname)
-    fname.close()
-
-    fname = open("dictionary_newsgroup.pickle", "wb")
-    pickle.dump(dictionary, fname)
-    fname.close()
-
-    fname = open("adjacency_newsgroup.pickle", "wb")
-    pickle.dump(adj_mat, fname)
-    fname.close()
-
-    #dumping into textfile format for anchor-word-recovery scripts
-    fout = open("docword.newsgroup.txt", "wb")
-    fout.write(str(len(bow_corpus)))
-    fout.write(str(len(vocabulary)))
-    fout.write(str(np.count_nonzero(adj_mat)))
-
-    (r,c) = adj_mat.shape
-
-    for i in range(0, r):
-        for j in range(0, c):
-            fout.write(str(i) + " " + str(j) + " " + str(adj_mat[i, j]) + "\n")
-
-    fout.close()
-
-
-    #writing vocabulary file
-    fout = open("vocab.newsgroup.txt", "wb")
-    for term in dictionary:
-        fout.write(term + "\n")
-    fout.close()
-
-    #write term document matrix to file
-    termdoc = np.zeros((r, len(bow_corpus)))
-    for counter in range(len(bow_corpus)):
-        doc = bow_corpus[counter]
-
-        for i in range(doc):
-            word_index = doc[i][0]
-            freq = doc[i][1]
-
-            termdoc[counter, i] = freq
-
-    fname = open("newsgroup_term_doc.pickle", "wb")
-    pickle.dump(termdoc)
-    pickle.close()
-
-
+    write(dictionary, bow_corpus, adj_mat, labels, "newsgroup")
 
 
 if __name__ =="__main__":
     newsgroup()
-    nyt()
+    twitter()
     nips()

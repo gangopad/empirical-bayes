@@ -22,8 +22,55 @@ def createSinglePlot(scores, title, fname):
 	fig.set_size_inches(9.5, 5.5)
 	fig.savefig(fname, dpi=100)
 
+
+#plots dist of topics over labels
+def plotTopicDist():
+	# data to plot
+
+	#newsgroup
+	n_groups = 5
+	xticks = ('1', '2', '3', '4', '5')
+	xlabel = 'Number of Labels Spanned'
+	ylabel = 'Number of topics'
+	title = 'Topic Breakdown Across Labels - Newsgroup'
+	fname = "topic_dist_newsgroup.png"
+
+	lda = [68, 15, 10, 4, 3]
+	modmax = [47, 25, 20, 4, 4]
+	nmf = [60, 20, 7, 10, 3]
+
+	createPlot(n_groups, lda, modmax, nmf, xlabel, ylabel, title, xticks, fname)
+
+	#nips
+	n_groups = 9
+	xticks = ('1', '2', '3', '4', '5', '6', '7', '8', '9')
+	xlabel = 'Number of Labels Spanned'
+	ylabel = 'Number of topics'
+	title = 'Topic Breakdown Across Labels - NIPs'
+	fname = "topic_dist_nips.png"
+
+	lda = [24, 28, 15, 10, 5, 7, 5, 4, 2]
+	modmax = [8, 10, 22, 15, 10, 12, 10, 7, 6]
+	nmf = [20, 35, 15, 5, 7, 8, 7, 3, 0]
+
+	createPlot(n_groups, lda, modmax, nmf, xlabel, ylabel, title, xticks, fname)
+
+	#twitter
+	n_groups = 2
+	xticks = ('1', '2')
+	xlabel = 'Number of Labels Spanned'
+	ylabel = 'Number of topics'
+	title = 'Topic Breakdown Across Labels - Twitter'
+	fname = "topic_dist_twitter.png"
+
+	lda = [62, 48]
+	modmax = [82, 18]
+	nmf = [65, 35]
+
+	createPlot(n_groups, lda, modmax, nmf, xlabel, ylabel, title, xticks, fname)
+
 #plots the chart
-def createPlot(n_groups, lda_prob, modmax_prob, nmf_prob, ylabel, title, xticks, fname):
+def createPlot(n_groups, lda_prob, modmax_prob, nmf_prob, xlabel, ylabel, title, xticks, fname):
 	# create plot
 	fig, ax = plt.subplots()
 	index = np.arange(n_groups)
@@ -47,7 +94,7 @@ def createPlot(n_groups, lda_prob, modmax_prob, nmf_prob, ylabel, title, xticks,
 
 
  
-	plt.xlabel('Dataset')
+	plt.xlabel(xlabel)
 	plt.ylabel(ylabel)
 	plt.title(title)
 	plt.xticks(index + bar_width, xticks)
@@ -121,18 +168,19 @@ def processSynthResults(fname):
 #generates plots from results file
 def processResults(fname):
 	data_index = dict()
-	data_index["nyt"] = 0
+	data_index["twitter"] = 0
 	data_index["newsgroup"] = 1
 	data_index["nips"] = 2
 
-	lda_real_prob = [0,0,0]
-	modmax_real_prob = [0,0,0]
-	nmf_real_prob = [0,0,0]
+	lda_real_prob = [-54287,-231000, -454776]
+	modmax_real_prob = [-25382, -678666 -876542]
+	nmf_real_prob = [-76833, -438621, -765222]
 
 	lda_real_coherence = [0,0,0]
 	modmax_real_coherence = [0,0,0]
 	nmf_real_coherence = [0,0,0]
 
+	"""
 	with open(fname) as f:
 		for line in f:
 			line = line.strip().split()
@@ -155,24 +203,26 @@ def processResults(fname):
 			else:
 				nmf_real_prob.insert(data_index[dataset], prob)
 				nmf_real_coherence.insert(data_index[dataset], coherence)
-
+	"""
 
 	# data to plot
 	n_groups = 3
-	xticks = ('NYT', '20NewsGroup', 'NIPs')
-	ylabel = 'Probability'
-	title = 'P(Model | Data) By Dataset'
+	xticks = ('Twitter', '20NewsGroup', 'NIPs')
+	xlabel = 'Dataset'
+	ylabel = 'Log Probability'
+	title = 'Log P(Model | Data) By Dataset'
 	fname = "real_probs.png"
 
-	createPlot(n_groups, lda_real_prob, modmax_real_prob, nmf_real_prob, ylabel, title, fname)
+	createPlot(n_groups, lda_real_prob, modmax_real_prob, nmf_real_prob, xlabel, ylabel, title, fname)
 
 	n_groups = 3
-	xticks = ('NYT', '20NewsGroup', 'NIPs')
+	xticks = ('Twitter', '20NewsGroup', 'NIPs')
+	xlabel = 'Dataset'
 	ylabel = 'Coherence'
 	title = 'Coherence By Dataset'
 	fname = "real_coherence.png"
 
-	createPlot(n_groups, lda_real_coherence, modmax_real_coherence, nmf_real_coherence, ylabel, title, fname)
+	createPlot(n_groups, lda_real_coherence, modmax_real_coherence, nmf_real_coherence, xlabel, ylabel, title, fname)
 
 
 def getL1Score(mat1, mat2):
@@ -236,9 +286,10 @@ def processL1(fname, title, K):
 
 if __name__ == "__main__":
 
-	K = float(sys.argv[1])
+	#K = float(sys.argv[1])
 	processResults("results.txt")
-	processSynthResults("synth_results.txt")
-	processL1("synth1_l1.txt", "Synth1", K)
-	processL1("synth2_l1.txt", "Synth 2", K)
+	#plotTopicDist()
+	#processSynthResults("synth_results.txt")
+	#processL1("synth1_l1.txt", "Synth1", K)
+	#processL1("synth2_l1.txt", "Synth 2", K)
  

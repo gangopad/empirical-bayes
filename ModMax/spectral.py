@@ -12,6 +12,9 @@ import pickle
 import scipy.stats
 import math
 import sys
+import os
+
+data_dir = "/Users/anirbang/DeltaSierra/Publications/EmpiricalBayes/data/"
 
 #computes the spectral clusters
 def computeSpectral(adj_mat, dictionary, cutoff):
@@ -20,13 +23,14 @@ def computeSpectral(adj_mat, dictionary, cutoff):
 
 
     # Cluster
-    sc = SpectralClustering(12, affinity='precomputed', n_init=100)
+    sc = SpectralClustering(100, affinity='precomputed', n_init=100)
     sc.fit(adj_mat)
 
     print "Computing omega"
     (omega, degrees) = computeOmega(adj_mat, sc.labels_, r, c)
     print "Computed omega"
 
+    """
     probs = computeProb(omega, adj_mat, cutoff)
     print "The computed P(D) is " + str(probs)
 
@@ -34,7 +38,10 @@ def computeSpectral(adj_mat, dictionary, cutoff):
     print "The coherence is "
     for i in range(len(coherence)):
         print "For topic " + str(i) + " the coherence is " + str(coherence[i])
+    """
 
+    probs = 0
+    coherence = []
 
     return probs, coherence, sc.labels_
 
@@ -49,7 +56,7 @@ def computeOmega(adj_mat, labels, r, c):
     omega = np.zeros((r, c))
     k_ci = dict() #k_{c_{i}} which represents the degree of connections outside the community fo node i
 
-    for node1 in range(0,r):
+    for node in range(0,r):
         deg = np.sum(adj_mat[node:])
         degrees[node] = deg
         curr_label = labels[node]
@@ -63,9 +70,9 @@ def computeOmega(adj_mat, labels, r, c):
         k_ci[node] = curr_k_ci
 
 
-    for node in range(0,r):
+    for node1 in range(0,r):
         for node2 in range(0,c):
-            if labels[node] == labels[node2]:
+            if labels[node1] == labels[node2]:
                 omega[node1, node2] = adj_mat[node1, node2] - float(degrees[node1] * degrees[node2])/float(2 * E)
             else:
                 omega[node1, node2] = float(k_ci[node1] * k_ci[node2])/(2 * E_cout)
@@ -77,9 +84,11 @@ def computeOmega(adj_mat, labels, r, c):
 def computeCoherence(adj_mat, labels, degrees, K):
     coherence = np.zeros(K)
     epsilon = 0.01
+    (r, c) = adj_mat.shape
 
-    for node1 in adj_mat:
-        for node2 in adj_mat:
+
+    for node1 in range(0,r):
+        for node2 in range(0,r):
             if labels[node1] == labels[node2]:
                 score = coherence[labels[node1]]
                 curr_coherence = (adj_mat[node1, node2] + epsilon)/(degrees[node2])
@@ -104,51 +113,60 @@ def computeProb(omega, adj_mat, cutoff):
     return prob
 
 
-#compute spectral clustering for newsgroup
-def newsgroup(cutoff):
-    file = open("../adjacency_newsgroup.pickle",'rb')
-    adj_mat = pickle.load(file)
-    file.close()
+#gets the breakdown of documents by topic
+def getDocumentTopicBreakDown(labels, adj_mat, dictionary, bow_corpus):
+    document_topics = []
 
-    file = open("../dictionary_newsgroup.pickle",'rb')
-    dictionary = pickle.load(file)
-    file.close()
+    for doc in bow_corpus:
+        denom = 0.0
+        topic_prob = dict()
+        topic_scores = [] #convert topic_prob to a list of (ind, float) where int is topic id and float is score
+        for word in doc:
+            label = labels[word[0]] #word is index (in dictionary) along with freq count
 
-    probs, coherence, labels = computeSpectral(adj_mat, dictionary, cutoff)
+            if label in topic_prob:
+                score = topic_prob[label]
+            else:
+                score = 0
 
-    # Compare ground-truth and clustering-results
-    print('spectral clustering')
-    print(labels)
+            score = score + 1
+            topic_prob[label] = score
+            denom = denom + 1
 
-    fout = open("../results.txt", "ab")
-    fout.write("newsgroup modmax" + str(prob))
+        for label in topic_prob:
+            score = float(topic_prob[label])/float(denom)
+            topic_scores.append((label, score))
 
-    for i in range(0,len(coherence)):
-        fout.write(str(coherence[i]) + " ")
+        document_topics.append(topic_scores)
 
-    fout.write("\n")
-    fout.close()
-
-
+    return document_topics
+    
 
 #compute spectral clustering for nyt
-def nyt(cutoff):
-    file = open("../adjacency_nyt.pickle",'rb')
-    adj_mat = pickle.load(file)
-    file.close()
+def compute(cutoff, dat_type):
+    fname = open(os.path.join(data_dir,'processed/bow_%s.pickle'%dat_type),'rb')
+    bow_corpus = pickle.load(fname)
+    fname.close()
 
-    file = open("../dictionary_nyt.pickle",'rb')
-    dictionary = pickle.load(file)
-    file.close()
+
+    fname = open(os.path.join(data_dir,'processed/adjacency_%s.pickle'%dat_type),'rb')
+    adj_mat = pickle.load(fname)
+    fname.close()
+
+    fname = open(os.path.join(data_dir,'processed/dictionary_%s.pickle'%dat_type),'rb')
+    dictionary = pickle.load(fname)
+    fname.close()
 
     probs, coherence, labels = computeSpectral(adj_mat, dictionary, cutoff)
 
     # Compare ground-truth and clustering-results
     print('spectral clustering')
-    print(labels)
+    print(len(set(labels)))
+
+    document_topics = getDocumentTopicBreakDown(labels, adj_mat, dictionary, bow_corpus)
 
     fout = open("../results.txt", "ab")
-    fout.write("nyt modmax" + str(prob))
+    fout.write(dat_type + " modmax" + str(probs))
 
     for i in range(0,len(coherence)):
         fout.write(str(coherence[i]) + " ")
@@ -156,123 +174,17 @@ def nyt(cutoff):
     fout.write("\n")
     fout.close()
 
-
-
-#compute spectral clustering for nips
-def nips(cutoff):
-    file = open("../adjacency_nips.pickle",'rb')
-    adj_mat = pickle.load(file)
-    file.close()
-
-    file = open("../dictionary_nips.pickle",'rb')
-    dictionary = pickle.load(file)
-    file.close()
-
-    probs, coherence, labels = computeSpectral(adj_mat, dictionary, cutoff)
-
-    # Compare ground-truth and clustering-results
-    print('spectral clustering')
-    print(labels)
-
-    fout = open("../results.txt", "ab")
-    fout.write("nips modmax" + str(prob))
-
-    for i in range(0,len(coherence)):
-        fout.write(str(coherence[i]) + " ")
-
-    fout.write("\n")
-    fout.close()
-
-
-#compute spectral clustering for synth1
-def synth1(cutoff, K):
-    file = open("../adjacency_synth1.pickle",'rb')
-    adj_mat = pickle.load(file)
-    file.close()
-
-    file = open("../dictionary_synth1.pickle",'rb')
-    dictionary = pickle.load(file)
-    file.close()
-
-    probs, coherence, labels = computeSpectral(adj_mat, dictionary, cutoff)
-
-    # Compare ground-truth and clustering-results
-    print('spectral clustering')
-    print(labels)
-
-    fout = open("../synth_results.txt", "ab")
-    fout.write("synth1 modmax" + str(prob))
-
-    for i in range(0,len(coherence)):
-        fout.write(str(coherence[i]) + " ")
-
-    fout.write("\n")
-    fout.close()
-
-    fout.open("synth1_l1.txt")
-    fout.write("modmax:")
-
-    topic_mat = np.zeros((K, len(dictionary)))
-    for i in range(K):
-        for j in range(labels):
-            if i == j:
-                topic_mat[K,j] = 1
-
-    for el in topic_mat.flatten():
-        fout.write(str(el) + " ")
-
-    fout.close()
-
-
-#compute spectral clustering for synth1
-def synth2(cutoff, K):
-    file = open("../adjacency_synth2.pickle",'rb')
-    adj_mat = pickle.load(file)
-    file.close()
-
-    file = open("../dictionary_synth2.pickle",'rb')
-    dictionary = pickle.load(file)
-    file.close()
-
-    probs, coherence, labels = computeSpectral(adj_mat, dictionary, cutoff)
-
-    # Compare ground-truth and clustering-results
-    print('spectral clustering')
-    print(labels)
-
-    fout = open("../synth_results.txt", "ab")
-    fout.write("synth2 modmax" + str(prob))
-
-    for i in range(0,len(coherence)):
-        fout.write(str(coherence[i]) + " ")
-
-    fout.write("\n")
-    fout.close()
-
-    fout.open("synth2_l1.txt")
-    fout.write("modmax:")
-
-    topic_mat = np.zeros((K, len(dictionary)))
-    for i in range(K):
-        for j in range(labels):
-            if i == j:
-                topic_mat[K,j] = 1
-
-    for el in topic_mat.flatten():
-        fout.write(str(el) + " ")
-
-    fout.close()
-
+    fname = open(os.path.join(data_dir,'processed/%s_spectral_document_topics.pickle'%dat_type), "wb")
+    pickle.dump(document_topics, fname)
+    fname.close()
 
 
 
 
 if __name__ == "__main__":
-    K = float(sys.argv[1])
-    cutoff = float(sys.argv[2]) #this parameter is intended to prevent underflow issues in probability computation
-    newsgroup(cutoff)
-    nyt(cutoff)
-    nips(cutoff)
-    synth1(cutoff, K)
-    synth2(cutoff, K)
-
+    cutoff = float(sys.argv[1]) #this parameter is intended to prevent underflow issues in probability computation
+    
+    #run on twitter, newsgroup, nips    
+    compute(cutoff, "nips")
+    #compute(cutoff, "newsgroup")
+    #compute(cutoff, "twitter")
